@@ -8,6 +8,7 @@
 
 #import "CSStickyParallaxHeaderViewController.h"
 #import "CSCell.h"
+#import "CSSectionHeader.h"
 #import "CSStickyHeaderFlowLayout.h"
 
 @interface CSStickyParallaxHeaderViewController ()
@@ -57,17 +58,7 @@
 {
     [super viewDidLoad];
 
-    CSStickyHeaderFlowLayout *layout = (id)self.collectionViewLayout;
-
-    if ([layout isKindOfClass:[CSStickyHeaderFlowLayout class]]) {
-        layout.parallaxHeaderReferenceSize = CGSizeMake(320, 426);
-        layout.parallaxHeaderMinimumReferenceSize = CGSizeMake(320, 110);
-        layout.parallaxHeaderAlwaysOnTop = YES;
-
-        // If we want to disable the sticky header effect
-        layout.disableStickyHeaders = YES;
-    }
-
+    [self reloadLayout];
 
     // Also insets the scroll indicator so it appears below the search bar
     self.collectionView.scrollIndicatorInsets = UIEdgeInsetsMake(0, 0, 0, 0);
@@ -75,6 +66,26 @@
     [self.collectionView registerNib:self.headerNib
           forSupplementaryViewOfKind:CSStickyHeaderParallaxHeader
                  withReuseIdentifier:@"header"];
+
+}
+
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    [self reloadLayout];
+}
+
+- (void)reloadLayout {
+
+    CSStickyHeaderFlowLayout *layout = (id)self.collectionViewLayout;
+
+    if ([layout isKindOfClass:[CSStickyHeaderFlowLayout class]]) {
+        layout.parallaxHeaderReferenceSize = CGSizeMake(self.view.frame.size.width, 426);
+        layout.parallaxHeaderMinimumReferenceSize = CGSizeMake(self.view.frame.size.width, 110);
+        layout.itemSize = CGSizeMake(self.view.frame.size.width, layout.itemSize.height);
+        layout.parallaxHeaderAlwaysOnTop = YES;
+
+        // If we want to disable the sticky header effect
+        layout.disableStickyHeaders = YES;
+    }
 
 }
 
@@ -103,7 +114,7 @@
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
     if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
 
-        CSCell *cell = [collectionView dequeueReusableSupplementaryViewOfKind:kind
+        CSSectionHeader *cell = [collectionView dequeueReusableSupplementaryViewOfKind:kind
                                                           withReuseIdentifier:@"sectionHeader"
                                                                  forIndexPath:indexPath];
 

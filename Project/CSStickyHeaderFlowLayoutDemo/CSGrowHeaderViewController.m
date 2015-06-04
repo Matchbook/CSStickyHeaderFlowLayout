@@ -8,6 +8,7 @@
 
 #import "CSGrowHeaderViewController.h"
 #import "CSCell.h"
+#import "CSSectionHeader.h"
 #import "CSStickyHeaderFlowLayout.h"
 
 @interface CSGrowHeaderViewController ()
@@ -41,15 +42,7 @@
 {
     [super viewDidLoad];
     
-    CSStickyHeaderFlowLayout *layout = (id)self.collectionViewLayout;
-    
-    if ([layout isKindOfClass:[CSStickyHeaderFlowLayout class]]) {
-        layout.parallaxHeaderReferenceSize = CGSizeMake(320, 200);
-    }
-
-    // If we want to disable the sticky header effect
-    layout.disableStickyHeaders = YES;
-
+    [self reloadLayout];
     // Also insets the scroll indicator so it appears below the search bar
     self.collectionView.scrollIndicatorInsets = UIEdgeInsetsMake(44, 0, 0, 0);
     
@@ -57,6 +50,21 @@
           forSupplementaryViewOfKind:CSStickyHeaderParallaxHeader
                  withReuseIdentifier:@"header"];
     
+}
+
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    [self reloadLayout];
+}
+
+- (void)reloadLayout {
+    CSStickyHeaderFlowLayout *layout = (id)self.collectionViewLayout;
+
+    if ([layout isKindOfClass:[CSStickyHeaderFlowLayout class]]) {
+        layout.parallaxHeaderReferenceSize = CGSizeMake(self.view.frame.size.width, 200);
+        layout.itemSize = CGSizeMake(self.view.frame.size.width, layout.itemSize.height);
+        // If we want to disable the sticky header effect
+        layout.disableStickyHeaders = YES;
+    }
 }
 
 #pragma mark UICollectionViewDataSource
@@ -86,7 +94,7 @@
         
         NSDictionary *obj = self.sections[indexPath.section];
         
-        CSCell *cell = [collectionView dequeueReusableSupplementaryViewOfKind:kind
+        CSSectionHeader *cell = [collectionView dequeueReusableSupplementaryViewOfKind:kind
                                                           withReuseIdentifier:@"sectionHeader"
                                                                  forIndexPath:indexPath];
         

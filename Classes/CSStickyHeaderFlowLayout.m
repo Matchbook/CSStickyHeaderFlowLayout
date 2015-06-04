@@ -11,10 +11,28 @@
 
 NSString *const CSStickyHeaderParallaxHeader = @"CSStickyHeaderParallexHeader";
 
+@interface CSStickyHeaderFlowLayout (Debug)
+
+- (void)debugLayoutAttributes:(NSArray *)layoutAttributes;
+
+@end
+
 @implementation CSStickyHeaderFlowLayout
 
 - (void)prepareLayout {
     [super prepareLayout];
+}
+
+- (UICollectionViewLayoutAttributes *)initialLayoutAttributesForAppearingSupplementaryElementOfKind:(NSString *)elementKind
+                                                                                        atIndexPath:(NSIndexPath *)elementIndexPath {
+
+    UICollectionViewLayoutAttributes *attributes = [super initialLayoutAttributesForAppearingSupplementaryElementOfKind:elementKind
+                                                                                                        atIndexPath:elementIndexPath];
+    CGRect frame = attributes.frame;
+    frame.origin.y += self.parallaxHeaderReferenceSize.height;
+    attributes.frame = frame;
+
+    return attributes;
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -82,14 +100,14 @@ NSString *const CSStickyHeaderParallaxHeader = @"CSStickyHeaderParallexHeader";
 
     // This method may not be explicitly defined, default to 1
     // https://developer.apple.com/library/ios/documentation/uikit/reference/UICollectionViewDataSource_protocol/Reference/Reference.html#jumpTo_6
-    NSUInteger numberOfSections = [self.collectionView.dataSource
-                                   respondsToSelector:@selector(numberOfSectionsInCollectionView:)]
-                                ? [self.collectionView.dataSource numberOfSectionsInCollectionView:self.collectionView]
-                                : 1;
+//    NSUInteger numberOfSections = [self.collectionView.dataSource
+//                                   respondsToSelector:@selector(numberOfSectionsInCollectionView:)]
+//                                ? [self.collectionView.dataSource numberOfSectionsInCollectionView:self.collectionView]
+//                                : 1;
 
     // Create the attributes for the Parallex header
-    if (visibleParallexHeader && ! CGSizeEqualToSize(CGSizeZero, self.parallaxHeaderReferenceSize) && numberOfSections > 0) {
-        CSStickyHeaderFlowLayoutAttributes *currentAttribute = [CSStickyHeaderFlowLayoutAttributes layoutAttributesForSupplementaryViewOfKind:CSStickyHeaderParallaxHeader withIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+    if (visibleParallexHeader && ! CGSizeEqualToSize(CGSizeZero, self.parallaxHeaderReferenceSize)) {
+        CSStickyHeaderFlowLayoutAttributes *currentAttribute = [CSStickyHeaderFlowLayoutAttributes layoutAttributesForSupplementaryViewOfKind:CSStickyHeaderParallaxHeader withIndexPath:[NSIndexPath indexPathWithIndex:0]];
         CGRect frame = currentAttribute.frame;
         frame.size.width = self.parallaxHeaderReferenceSize.width;
         frame.size.height = self.parallaxHeaderReferenceSize.height;
@@ -99,7 +117,7 @@ NSString *const CSStickyHeaderParallaxHeader = @"CSStickyHeaderParallexHeader";
 
         // make sure the frame won't be negative values
         CGFloat y = MIN(maxY - self.parallaxHeaderMinimumReferenceSize.height, bounds.origin.y + self.collectionView.contentInset.top);
-        CGFloat height = MAX(1, -y + maxY);
+        CGFloat height = MAX(0, -y + maxY);
 
 
         CGFloat maxHeight = self.parallaxHeaderReferenceSize.height;
@@ -148,6 +166,9 @@ NSString *const CSStickyHeaderParallaxHeader = @"CSStickyHeaderParallexHeader";
         }];
     }
 
+    // For debugging purpose
+//     [self debugLayoutAttributes:allItems];
+
     return allItems;
 }
 
@@ -160,6 +181,11 @@ NSString *const CSStickyHeaderParallaxHeader = @"CSStickyHeaderParallexHeader";
 }
 
 - (CGSize)collectionViewContentSize {
+    // If not part of view hierarchy then return CGSizeZero (as in docs).
+    // Call [super collectionViewContentSize] can cause EXC_BAD_ACCESS when collectionView has no superview.
+    if (!self.collectionView.superview) {
+        return CGSizeZero;
+    }
     CGSize size = [super collectionViewContentSize];
     size.height += self.parallaxHeaderReferenceSize.height;
     return size;
@@ -174,6 +200,12 @@ NSString *const CSStickyHeaderParallaxHeader = @"CSStickyHeaderParallexHeader";
 
 + (Class)layoutAttributesClass {
     return [CSStickyHeaderFlowLayoutAttributes class];
+}
+
+- (void)setParallaxHeaderReferenceSize:(CGSize)parallaxHeaderReferenceSize {
+    _parallaxHeaderReferenceSize = parallaxHeaderReferenceSize;
+    // Make sure we update the layout
+    [self invalidateLayout];
 }
 
 #pragma mark Helper
@@ -206,3 +238,56 @@ NSString *const CSStickyHeaderParallaxHeader = @"CSStickyHeaderParallexHeader";
 }
 
 @end
+
+#pragma mark - Debugging
+
+@implementation CSStickyHeaderFlowLayoutAttributes (Debug)
+
+- (NSString *)description {
+    NSString *indexPathString = [NSString stringWithFormat:@"{%ld, %ld}", (long)self.indexPath.section, (long)self.indexPath.item];
+
+    NSString *desc = [NSString stringWithFormat:@"<CSStickyHeaderFlowLayout: %p> indexPath: %@ zIndex: %ld valid: %@ kind: %@", self, indexPathString, (long)self.zIndex, [self isValid] ? @"YES" : @"NO", self.representedElementKind ?: @"cell"];
+
+    return desc;
+}
+
+- (BOOL)isValid {
+    switch (self.representedElementCategory) {
+        case UICollectionElementCategoryCell:
+            if (self.zIndex != 1) {
+                return NO;
+            }
+            return YES;
+        case UICollectionElementCategorySupplementaryView:
+            if ([self.representedElementKind isEqualToString:CSStickyHeaderParallaxHeader]) {
+                return YES;
+            } else if (self.zIndex < 1024) {
+                return NO;
+            }
+            return YES;
+        default:
+            return YES;
+    }
+}
+
+@end
+
+
+@implementation CSStickyHeaderFlowLayout (Debug)
+
+- (void)debugLayoutAttributes:(NSArray *)layoutAttributes {
+    __block BOOL hasInvalid = NO;
+    [layoutAttributes enumerateObjectsUsingBlock:^(CSStickyHeaderFlowLayoutAttributes *attr, NSUInteger idx, BOOL *stop) {
+        hasInvalid = ![attr isValid];
+        if (hasInvalid) {
+            *stop = YES;
+        }
+    }];
+
+    if (hasInvalid) {
+        NSLog(@"CSStickyHeaderFlowLayout: %@", layoutAttributes);
+    }
+}
+
+@end
+

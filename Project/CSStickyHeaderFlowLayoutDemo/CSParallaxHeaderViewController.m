@@ -8,6 +8,7 @@
 
 #import "CSParallaxHeaderViewController.h"
 #import "CSCell.h"
+#import "CSSectionHeader.h"
 #import "CSStickyHeaderFlowLayout.h"
 
 @interface CSParallaxHeaderViewController ()
@@ -39,17 +40,33 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    CSStickyHeaderFlowLayout *layout = (id)self.collectionViewLayout;
 
-    if ([layout isKindOfClass:[CSStickyHeaderFlowLayout class]]) {
-        layout.parallaxHeaderReferenceSize = CGSizeMake(320, 200);
-    }
-    
+    [self reloadLayout];
     [self.collectionView registerNib:self.headerNib
           forSupplementaryViewOfKind:CSStickyHeaderParallaxHeader
                  withReuseIdentifier:@"header"];
     
+}
+
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    [self reloadLayout];
+}
+
+- (void)reloadLayout {
+    CSStickyHeaderFlowLayout *layout = (id)self.collectionViewLayout;
+
+    if ([layout isKindOfClass:[CSStickyHeaderFlowLayout class]]) {
+        layout.parallaxHeaderReferenceSize = CGSizeMake(self.view.frame.size.width, 200);
+        layout.itemSize = CGSizeMake(self.view.frame.size.width, layout.itemSize.height);
+    }
+}
+
+- (IBAction)reloadButtonDidPress:(id)sender {
+    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [self.collectionView numberOfSections])];
+
+//    NSIndexSet(indexesInRange: NSMakeRange(0, self.collectionView.numberOfSections()))
+    [self.collectionView reloadSections:indexSet];
+
 }
 
 #pragma mark UICollectionViewDataSource
@@ -79,10 +96,10 @@
         
         NSDictionary *obj = self.sections[indexPath.section];
 
-        CSCell *cell = [collectionView dequeueReusableSupplementaryViewOfKind:kind
+        CSSectionHeader *cell = [collectionView dequeueReusableSupplementaryViewOfKind:kind
                                                           withReuseIdentifier:@"sectionHeader"
                                                                  forIndexPath:indexPath];
-        
+
         cell.textLabel.text = [[obj allKeys] firstObject];
 
         return cell;
