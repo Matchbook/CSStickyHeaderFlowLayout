@@ -1,5 +1,11 @@
 # CSStickyHeaderFlowLayout
 
+## Contributors
+
+For anyone who'd like to be a contributor to the repository, please read the [Contribution Guideline](https://github.com/CSStickyHeaderFlowLayout/CSStickyHeaderFlowLayout/wiki/Contribution-Guidelines)
+
+---
+
 <!--![](http://cl.ly/image/1D2i0746180b/1*pev9ZXJAZ2MYoF8-R_nbRA.gif)-->
 
 <img src="http://f.cl.ly/items/05130s2r0X1j1x1N0Q3n/spotify-48-16-half.gif" width="276"/>
@@ -14,16 +20,25 @@ UICollectionViewLayout.
 [![Version](http://cocoapod-badges.herokuapp.com/v/CSStickyHeaderFlowLayout/badge.png)](http://cocoadocs.org/docsets/CSStickyHeaderFlowLayout)
 [![Platform](http://cocoapod-badges.herokuapp.com/p/CSStickyHeaderFlowLayout/badge.png)](http://cocoadocs.org/docsets/CSStickyHeaderFlowLayout)
 
+### Cocoapods
 
 CSStickyHeaderFlowLayout is available through [CocoaPods](http://cocoapods.org), to install
 it simply add the following line to your Podfile:
 
     pod "CSStickyHeaderFlowLayout"
 
+### Carthage
+
+CSStickyHeaderFlowLayout is also available with Carthage.
+Add `github "CSStickyHeaderFlowLayout/CSStickyHeaderFlowLayout"` to your Cartfile
+
 Alternatively, you can just drag the files from `CSStickyHeaderFlowLayout / Classes` into your own project.
 
+## Usage (Swift/Code)
 
-## Usage
+Documentation is coming soon. For now please open `CSStickyHeaderFlowLayout.xcworkspace` > `SwiftDemo` target.
+
+## Usage (CocoaPods/Objective-C/Storyboard)
 
 To run the example project; clone the repo, and run `pod install` from the Project directory first.
 
@@ -106,20 +121,16 @@ Run the project examples and it'll shows you exactly how you achieve different e
 
 ![](http://f.cl.ly/items/313D2n3R0H0e0x090B3X/different-header.jpeg)
 
-
-
-## Donation
-
-If you think this worths something, tip me a cup of coffee! (p.s. was trying out ChangeTip, or if you know any better donation button, let [me](http://twitter.com/@jamztang) know) :)
-
-<a target="_blank" href="http://jamztang.tip.me">
-  <img
-    alt="Tip Me With ChangeTip"
-    src="https://cdn.changetip.com/img/logos/tipme_round.png"/>
-</a>
-
-
 ## Updates
+- 0.2.11: Add support for carthage.
+
+- 0.2.10: Fixed issue because attributes were not copied and datasource might have been niled
+
+- 0.2.9: Remove Supplementry Header Layout Attribute to prevent crash when returning nil and while is CGSizeZero
+
+- 0.2.8: Fixed a visual issue when animating contentInsets #85 and crash when dragging cells #69
+
+- 0.2.7: Fixed scroll indicator covered by cell
 
 - 0.2.6: Fixing that section header being covered by cell after perform batch update
 

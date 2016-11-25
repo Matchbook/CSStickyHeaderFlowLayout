@@ -8,6 +8,17 @@
 
 #import <UIKit/UIKit.h>
 
+//! Project version number for CSStickyHeaderFlowLayout.
+FOUNDATION_EXPORT double CSStickyHeaderFlowLayoutVersionNumber;
+
+//! Project version string for CSStickyHeaderFlowLayout.
+FOUNDATION_EXPORT const unsigned char CSStickyHeaderFlowLayoutVersionString[];
+
+// Import All public headers
+#import <CSStickyHeaderFlowLayout/CSStickyHeaderFlowLayoutAttributes.h>
+
+#pragma mark -
+
 extern NSString *const CSStickyHeaderParallaxHeader;
 
 @interface CSStickyHeaderFlowLayout : UICollectionViewFlowLayout
@@ -16,6 +27,7 @@ extern NSString *const CSStickyHeaderParallaxHeader;
 @property (nonatomic) CGSize parallaxHeaderMinimumReferenceSize;
 @property (nonatomic) BOOL parallaxHeaderAlwaysOnTop;
 @property (nonatomic) BOOL disableStickyHeaders;
+@property (nonatomic) BOOL disableStretching;
 
 - (void)updateHeaderAttributes:(UICollectionViewLayoutAttributes *)attributes lastCellAttributes:(UICollectionViewLayoutAttributes *)lastCellAttributes;
 
